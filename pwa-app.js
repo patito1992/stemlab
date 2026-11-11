@@ -80,7 +80,10 @@ function paint(uid) { const b = document.querySelector(`[data-bar="${uid}"]`); i
 function renderAccount() {
   const on = g.hasSession();
   $('#acctOff').classList.toggle('hidden', on); $('#acctOn').classList.toggle('hidden', !on);
-  $('#acctMail').textContent = g.email() || 'tu cuenta de Google'; $('#acctTag').textContent = on ? 'conectada' : '';
+  $('#acctMail').textContent = g.email() || 'tu cuenta de Google'; $('#acctTag').textContent = on ? (g.isFriend() ? 'conectada · biblioteca compartida' : 'conectada') : '';
+  const fr = on && g.isFriend();
+  document.querySelector('.drop').classList.toggle('hidden', fr);
+  if ($('#addNote').dataset.mode !== (fr ? 'f' : 'o')) { $('#addNote').dataset.mode = fr ? 'f' : 'o'; $('#addNote').textContent = fr ? 'Pegá un link: la PC del dueño lo procesa cuando esté encendida y después aparece acá, para vos y para los demás.' : 'Tu PC la procesa cuando esté encendida y con StemLab abierto. Cuando termine, aparece acá lista para bajar.'; }
 }
 async function render() {
   local = await store.listSongs();
@@ -110,7 +113,12 @@ async function render() {
 
 // ---- acciones --------------------------------------------------------------------------------------------
 $('#signin').onclick = async () => {
-  try { await g.signIn(true); await sync(); } catch (e) { note(e.message); }
+  try {
+    await g.signIn(true);
+    const r = await g.detectRole();
+    if (r === 'none') { await g.signOut(); note('Tu cuenta de Google no está en la lista de amigos. Pedile al dueño que la agregue y volvé a intentar.'); renderAccount(); return; }
+    await sync();
+  } catch (e) { note(e.message); }
   renderAccount();
 };
 $('#signout').onclick = async () => { await g.signOut(); files = []; manifest = { songs: [], queue: [] }; renderAccount(); render(); };
@@ -125,6 +133,7 @@ function openMenu(uid) {
   $('#menuTitle').textContent = s?.title || 'Tema';
   const here = local.some(x => x.uid === uid);
   $('#mRemove').style.display = here ? '' : 'none';
+  $('#mDelete').style.display = g.isFriend() && !s?.mine ? 'none' : '';
   $('#menu').showModal();
 }
 $('#mCancel').onclick = () => $('#menu').close();

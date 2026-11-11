@@ -1,6 +1,6 @@
 // Inicio de sesión con Google (Google Identity Services) y cliente mínimo de Drive para la carpeta oculta de la app.
 // El celu nunca ve el resto de tu Drive: el permiso es solo `drive.appdata`.
-import { CLIENT_ID } from './config.js';
+import { CLIENT_ID, CENTRAL_URL, API_KEY } from './config.js';
 
 const SCOPE = 'openid email https://www.googleapis.com/auth/drive.appdata';
 const API = 'https://www.googleapis.com/drive/v3', UP = 'https://www.googleapis.com/upload/drive/v3';
@@ -8,6 +8,38 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 let tokenClient = null, token = null, expires = 0;
 
 export class AuthNeeded extends Error {}
+
+// ---- modo amigo: la biblioteca del dueño llega por la "central"; los archivos se bajan de Drive con su ID ----
+export const role = () => localStorage.getItem('stemlab.role') || 'owner';
+export const isFriend = () => role() === 'friend';
+let lib = { songs: [], queue: [], pending: [] };
+async function central(action, extra = {}) {
+  const t = await accessToken();
+  let r;
+  try { r = await fetch(CENTRAL_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ token: t, action, ...extra }) }); }
+  catch { throw new Error('Sin conexión con la central.'); }
+  let j; try { j = await r.json(); } catch { throw new Error('La central no respondió bien.'); }
+  if (j.error) throw new Error(j.error);
+  return j;
+}
+/** Después de conectar: ¿esta cuenta es del dueño, un amigo autorizado o ninguna de las dos? */
+export async function detectRole() {
+  if (!CENTRAL_URL) { localStorage.setItem('stemlab.role', 'owner'); return 'owner'; }
+  const j = await central('me');
+  localStorage.setItem('stemlab.role', j.role);
+  return j.role;
+}
+async function friendList() {
+  lib = await central('library');
+  const out = [{ name: 'manifest.json', id: '__central__', modifiedTime: String(lib.songs.length) }];
+  for (const s of lib.songs) {
+    out.push({ name: `audio-${s.uid}.zip`, id: s.audio_id, size: String(s.audio_size || 0), modifiedTime: '' });
+    out.push({ name: `meta-${s.uid}.json`, id: s.meta_id, modifiedTime: s.meta_mod || '' });
+  }
+  for (const p of lib.pending || []) out.push({ name: `pending-${p.id}.json`, id: '__p' + p.id, modifiedTime: '' });
+  return out;
+}
+const pubUrl = id => `${API}/files/${id}?alt=media&key=${API_KEY}`;
 
 function loadGsi() {
   return new Promise((res, rej) => {
@@ -57,7 +89,7 @@ async function accessToken() {
 export async function signOut() {
   try { if (token && window.google?.accounts?.oauth2) google.accounts.oauth2.revoke(token); } catch { /* da igual */ }
   token = null; expires = 0;
-  localStorage.removeItem('stemlab.google'); localStorage.removeItem('stemlab.email');
+  localStorage.removeItem('stemlab.google'); localStorage.removeItem('stemlab.email'); localStorage.removeItem('stemlab.role');
 }
 
 async function req(method, url, { params, headers, body } = {}) {
@@ -77,6 +109,7 @@ async function req(method, url, { params, headers, body } = {}) {
 }
 
 export async function list() {
+  if (isFriend()) return friendList();
   const out = []; let page;
   do {
     const params = { spaces: 'appDataFolder', pageSize: '1000', fields: 'nextPageToken,files(id,name,size,modifiedTime)' };
@@ -87,11 +120,20 @@ export async function list() {
   return out;
 }
 
-export const readJson = async id => (await req('GET', `${API}/files/${id}`, { params: { alt: 'media' } })).json();
+export const readJson = async id => {
+  if (isFriend()) {
+    if (id === '__central__') return { songs: lib.songs, queue: lib.queue };
+    if (id.startsWith('__p')) return (lib.pending || []).find(p => '__p' + p.id === id) || {};
+    const r = await fetch(pubUrl(id)); if (!r.ok) throw new Error(`No se pudo leer el tema (${r.status}).`); return r.json();
+  }
+  return (await req('GET', `${API}/files/${id}`, { params: { alt: 'media' } })).json();
+};
 
 /** Baja un archivo entero informando el avance (0..1). Devuelve un ArrayBuffer. */
 export async function download(id, size, onProgress = () => {}) {
-  const r = await req('GET', `${API}/files/${id}`, { params: { alt: 'media' } });
+  let r;
+  if (isFriend()) { r = await fetch(pubUrl(id)); if (!r.ok) throw new Error(r.status === 403 || r.status === 429 ? 'Google limitó esta descarga por ahora: probá en unos minutos.' : `No se pudo bajar (${r.status}).`); }
+  else r = await req('GET', `${API}/files/${id}`, { params: { alt: 'media' } });
   const total = Number(size) || Number(r.headers.get('content-length')) || 0;
   if (!r.body?.getReader) return r.arrayBuffer();
   const reader = r.body.getReader(), chunks = []; let got = 0;
@@ -140,10 +182,12 @@ export async function remove(id) {
 export const newId = () => [...crypto.getRandomValues(new Uint8Array(6))].map(b => b.toString(16).padStart(2, '0')).join('');
 
 // ---- pedidos para la PC (los lee y borra la PC cuando está encendida) ----------------------------------
-export const requestUrl = (url, title = '') => { const id = newId(); return putJson(`pending-${id}.json`, { id, kind: 'url', url, title, created: Date.now() }); };
+export const requestUrl = (url, title = '') => { if (isFriend()) return central('request', { url, title });
+  const id = newId(); return putJson(`pending-${id}.json`, { id, kind: 'url', url, title, created: Date.now() }); };
 export async function requestFile(file, onProgress) {
+  if (isFriend()) throw new Error('Subir audios no está disponible en la biblioteca compartida: pegá un link.');
   const id = newId(), ext = (file.name.match(/\.([A-Za-z0-9]{1,5})$/) || [, 'mp3'])[1].toLowerCase();
   await uploadFile(`inbox-${id}.${ext}`, file, onProgress);                       // primero el audio, después el pedido
   return putJson(`pending-${id}.json`, { id, kind: 'file', file: `inbox-${id}.${ext}`, title: file.name.replace(/\.[^.]+$/, ''), created: Date.now() });
 }
-export const requestDelete = uid => putJson(`delete-${uid}.json`, { uid, created: Date.now() });
+export const requestDelete = uid => isFriend() ? central('delete', { uid }) : putJson(`delete-${uid}.json`, { uid, created: Date.now() });
