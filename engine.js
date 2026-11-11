@@ -34,7 +34,7 @@ export class Engine {
     this.semitones = 0;         // transposición de los instrumentos melódicos (hito 6)
     this.masterVol = 1;
     this.analysis = null;       // {bpm, beats, meter, downbeat_phase, key, chords}
-    this.clickOn = false; this.clickVol = 0.7; this.subdiv = 1; this.countIn = 0; this.clickNudge = 0;
+    this.clickOn = false; this.clickVol = 0.7; this.clickFreq = 1700; this.subdiv = 1; this.countIn = 0; this.clickNudge = 0;
     this._ci = 0; this._ck = 0; this._clickTimer = null; this.clickGain = null; this._clickBufs = null;
     this.loopA = null; this.loopB = null; this.loopOn = false; this._lc = 0;   // loop A-B
     this.onLoopChange = () => {};
@@ -78,9 +78,7 @@ export class Engine {
     this.analyser = this.ctx.createAnalyser(); this.analyser.fftSize = 1024;
     this.master.connect(this.analyser); this.master.connect(this.ctx.destination);
     this.clickGain = this.ctx.createGain(); this.clickGain.gain.value = this.clickVol; this.clickGain.connect(this.master);
-    this._clickBufs = {
-      accent: this._makeClick(1700, 1.0), beat: this._makeClick(1150, 0.8), sub: this._makeClick(820, 0.5),
-    };
+    this._buildClickBufs();
     for (const k of ['mel', 'rhy']) this.buses[k] = { in: this.ctx.createGain(), st: null };
     for (const [name, s] of Object.entries(this.stems)) {
       s.gain = this.ctx.createGain();
@@ -261,6 +259,11 @@ export class Engine {
   get hasBeats() { return !!(this.analysis && this.analysis.beats && this.analysis.beats.length > 4); }
   setClickOn(b) { this.clickOn = b; }
   setClickVol(v) { this.clickVol = v; if (this.clickGain) this.clickGain.gain.value = v; }
+  setClickFreq(f) { this.clickFreq = f; if (this.ctx) this._buildClickBufs(); }   // tono del acento; el resto guarda las mismas proporciones
+  _buildClickBufs() {
+    const f = this.clickFreq;
+    this._clickBufs = { accent: this._makeClick(f, 1.0), beat: this._makeClick(f * 0.68, 0.8), sub: this._makeClick(f * 0.48, 0.5) };
+  }
   setSubdiv(n) { this.subdiv = n; this._ck = 0; }
   setCountIn(bars) { this.countIn = bars; }
   setClickNudge(ms) { this.clickNudge = ms / 1000; }

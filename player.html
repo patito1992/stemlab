@@ -63,7 +63,9 @@
       <summary>Click y pre-conteo</summary>
       <div class="body">
         <div class="ctl-r wide"><button id="clickToggle" class="btn">Apagado</button>
-          <input id="clickVol" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Volumen del click"></div>
+          <input id="clickVol" type="range" min="0" max="4" step="0.05" value="0.7" aria-label="Volumen del click"></div>
+        <div class="ctl-r wide"><span class="inl">Tono</span>
+          <input id="clickPitch" type="range" min="300" max="5000" step="50" value="1700" aria-label="Tono del click"> <span id="clickHz" class="inl">1700 Hz</span></div>
         <div class="opts">
           <label class="inl">Subdivisión <select id="subdiv"><option value="1">Negras</option><option value="2">Corcheas</option><option value="3">Tresillos</option><option value="4">Semicorcheas</option></select></label>
           <label class="inl">Pre-conteo <select id="countin"><option value="0">Sin</option><option value="1">1 compás</option><option value="2">2 compases</option></select></label>

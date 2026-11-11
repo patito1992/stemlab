@@ -137,7 +137,7 @@ const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 
 let songBpm = 0;
 function updateBpmNow(p) { if (songBpm) $('#bpmNow').textContent = `→ ${(songBpm * p / 100).toFixed(1)} BPM ahora`; }
 function setupAnalysis(a) {
-  const clickCtl = ['#clickVol', '#clickToggle', '#subdiv', '#countin', '#nudge'];
+  const clickCtl = ['#clickVol', '#clickPitch', '#clickToggle', '#subdiv', '#countin', '#nudge'];
   if (!a) {
     $('#info').innerHTML = '<span class="chip">Sin análisis: no hay click ni acordes</span>';
     clickCtl.concat(['#bpmTarget']).forEach(s => $(s).disabled = true); return;
@@ -152,6 +152,7 @@ $('#bpmTarget').addEventListener('change', e => {
 });
 $('#clickToggle').onclick = e => { const on = !engine.clickOn; engine.setClickOn(on); e.target.textContent = on ? 'Encendido' : 'Apagado'; e.target.classList.toggle('on', on); };
 $('#clickVol').oninput = e => engine.setClickVol(+e.target.value);
+$('#clickPitch').oninput = e => { const f = +e.target.value; $('#clickHz').textContent = f + ' Hz'; engine.setClickFreq(f); };
 $('#subdiv').onchange = e => engine.setSubdiv(+e.target.value);
 $('#countin').onchange = e => engine.setCountIn(+e.target.value);
 $('#nudge').onchange = e => engine.setClickNudge(+e.target.value || 0);

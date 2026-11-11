@@ -1,5 +1,5 @@
 // Service worker de StemLab: deja la app lista para abrir sin internet. La versión cambia sola con cada publicación.
-const CACHE = 'stemlab-pwa-595492d954';
+const CACHE = 'stemlab-pwa-f37b4bf38d';
 const FILES = [
  "./",
  "chords.js",
