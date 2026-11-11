@@ -58,6 +58,7 @@ async function refreshMeta() {
 
 // ---- descargar un tema ---------------------------------------------------------------------------------
 async function download(uid) {
+  try { await g.fresh(); } catch (e) { note('No se pudo renovar el permiso de Google: ' + e.message); return; }
   const af = files.find(f => f.name === `audio-${uid}.zip`), mf = files.find(f => f.name === `meta-${uid}.json`);
   if (!af || !mf) { note('Ese tema todavía no está completo en Drive.'); return; }
   progress[uid] = 0.001; render();
@@ -113,7 +114,7 @@ $('#signin').onclick = async () => {
   renderAccount();
 };
 $('#signout').onclick = async () => { await g.signOut(); files = []; manifest = { songs: [], queue: [] }; renderAccount(); render(); };
-$('#syncNow').onclick = () => sync();
+$('#syncNow').onclick = async () => { try { if (navigator.onLine) await g.fresh(); } catch (e) { note(e.message); return; } sync(); };
 $('#list').addEventListener('click', e => {
   const d = e.target.closest('[data-dl]'); if (d) return download(d.dataset.dl);
   const m = e.target.closest('[data-menu]'); if (m) openMenu(m.dataset.menu);
@@ -130,6 +131,7 @@ $('#mCancel').onclick = () => $('#menu').close();
 $('#mRemove').onclick = async () => { $('#menu').close(); await store.delSong(menuUid); render(); };
 $('#mDelete').onclick = async () => {
   $('#menu').close();
+  try { if (g.hasSession()) await g.fresh(); } catch (e) { note(e.message); return; }
   if (!confirm('Esto borra el tema del teléfono, de tu Drive y de tu PC (cuando esté encendida). No se puede deshacer. ¿Seguir?')) return;
   try {
     await store.delSong(menuUid);
@@ -140,12 +142,13 @@ $('#mDelete').onclick = async () => {
 $('#urlForm').onsubmit = async e => {
   e.preventDefault();
   if (!g.hasSession()) return note('Primero conectá tu cuenta de Google.');
-  try { await g.requestUrl($('#url').value.trim()); $('#url').value = ''; $('#addNote').textContent = 'Pedido enviado. Tu PC lo toma cuando esté encendida.'; note(''); await sync(false); }
+  try { await g.fresh(); await g.requestUrl($('#url').value.trim()); $('#url').value = ''; $('#addNote').textContent = 'Pedido enviado. Tu PC lo toma cuando esté encendida.'; note(''); await sync(false); }
   catch (err) { note('No se pudo enviar el pedido: ' + err.message); }
 };
 $('#file').onchange = async e => {
   if (!g.hasSession()) { note('Primero conectá tu cuenta de Google.'); return; }
   const list = [...e.target.files]; e.target.value = '';
+  try { await g.fresh(); } catch (err) { note('No se pudo renovar el permiso de Google: ' + err.message); return; }
   let ok = 0;
   for (const [i, f] of list.entries()) {
     try { await g.requestFile(f, p => { $('#addNote').textContent = `Subiendo ${i + 1}/${list.length}: ${f.name} (${Math.round(p * 100)}%)`; }); ok++; }

@@ -42,6 +42,12 @@ export async function signIn(interactive = false) {
   return token;
 }
 
+/** Para usar al empezar un clic del usuario: si el permiso venció, lo renueva con la ventana de Google (necesita el gesto del usuario en el celu). */
+export async function fresh() {
+  if (token && Date.now() < expires) return token;
+  return signIn(true);
+}
+
 async function accessToken() {
   if (token && Date.now() < expires) return token;
   if (!hasSession()) throw new AuthNeeded('Conectá tu cuenta de Google.');
