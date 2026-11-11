@@ -1,0 +1,61 @@
+/* StemLab: estilos compartidos (biblioteca y reproductor) */
+:root{
+  --bg:#0b0a10;--panel:#14131c;--panel2:#1d1c29;--line:#2a2938;--fg:#f3f2fa;--mut:#9a97b0;
+  --acc:#8b6cff;--acc2:#c25bff;--ok:#4ade80;--err:#ff6b81;--warn:#ffc857;
+  --grad:linear-gradient(135deg,#7a5cff,#c25bff);
+  --r:16px;--font:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{margin:0;background:radial-gradient(1200px 500px at 50% -200px,#1d1738 0,transparent 70%) no-repeat,var(--bg);color:var(--fg);font:15px/1.45 var(--font);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:650;letter-spacing:-.01em}
+a{color:inherit;text-decoration:none}
+.hidden{display:none!important}
+.muted{color:var(--mut)}
+.small{font-size:13px}
+
+/* barra superior */
+.top{display:flex;align-items:center;gap:14px;padding:14px max(16px,calc((100% - 1040px)/2));position:sticky;top:0;z-index:20;background:rgba(11,10,16,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;letter-spacing:-.02em}
+.brand i{width:26px;height:26px;border-radius:8px;background:var(--grad);display:inline-block;position:relative}
+.brand i::after{content:"";position:absolute;inset:7px 6px;background:linear-gradient(90deg,#fff 0 2px,transparent 2px 4px,#fff 4px 6px,transparent 6px 8px,#fff 8px 10px);opacity:.9;border-radius:1px}
+.top .sp{flex:1}
+.back{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--panel2);font-size:20px;line-height:1}
+.back:hover{background:#26253a}
+
+main{max-width:1040px;margin:0 auto;padding:18px 16px 40px;display:grid;gap:14px}
+
+/* paneles plegables */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}
+.panel>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 16px;font-weight:600;font-size:15px;border-radius:var(--r);user-select:none}
+.panel>summary::-webkit-details-marker{display:none}
+.panel>summary::after{content:"";margin-left:auto;width:9px;height:9px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);transform:rotate(45deg) translate(-2px,-2px);transition:transform .18s}
+.panel[open]>summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
+.panel>summary:hover{background:rgba(255,255,255,.025)}
+.panel>summary .tag{font-weight:500;font-size:12px;color:var(--mut)}
+.panel>.body{padding:2px 16px 16px;display:grid;gap:12px}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+
+/* controles */
+button{font:inherit;color:var(--fg);cursor:pointer}
+.btn{padding:9px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);font-weight:600;font-size:14px;transition:background .15s,border-color .15s}
+.btn:hover:not(:disabled){background:#26253a;border-color:#3a3950}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:var(--grad);border-color:transparent;color:#fff}
+.btn.primary:hover:not(:disabled){filter:brightness(1.1);background:var(--grad)}
+.btn.on{background:rgba(139,108,255,.2);border-color:var(--acc);color:#d9ceff}
+.btn.sq{width:40px;padding:9px 0;text-align:center;font-size:16px}
+.link{background:none;border:0;color:#b9a6ff;padding:4px 6px;font-size:13px}
+.link:hover{color:#fff}
+input[type=text],input[type=url],input[type=number],select,textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+input[type=number]{width:84px}
+textarea{width:100%;resize:vertical}
+input[type=range]{accent-color:var(--acc);width:100%;margin:0;height:22px}
+input[type=checkbox]{accent-color:var(--acc);width:16px;height:16px}
+label.inl{display:inline-flex;align-items:center;gap:8px;color:var(--mut);font-size:14px}
+.chip{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);font-size:12px;color:#cfcbe6;font-variant-numeric:tabular-nums}
+.chip.acc{background:rgba(139,108,255,.16);border-color:rgba(139,108,255,.4);color:#d9ceff}
+.warn{background:#3a1c25;border:1px solid #6b2a3b;color:#ffc2cd;border-radius:12px;padding:10px 14px;font-size:13px;word-break:break-word}
+.bar{height:6px;background:var(--panel2);border-radius:3px;overflow:hidden}
+.bar>div{height:100%;width:0;background:var(--grad);transition:width .2s}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

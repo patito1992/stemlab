@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es" data-mode="pwa"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0a10">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>StemLab</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="library.css">
+<link rel="stylesheet" href="pwa.css">
+</head><body>
+<header class="top"><div class="brand"><i></i>StemLab</div><span class="sp"></span><button id="foldAll" class="link"></button></header>
+<main>
+  <div id="note" class="warn hidden"></div>
+
+  <details class="panel" id="p-acct" open>
+    <summary>Cuenta de Google <span class="tag" id="acctTag"></span></summary>
+    <div class="body">
+      <div id="acctOff">
+        <p class="muted small">Conectá tu cuenta de Google para ver los temas que procesó tu PC y bajarlos al teléfono. StemLab solo usa su propia carpeta oculta de tu Drive: no puede ver el resto de tus archivos. <a href="privacy.html">Política de privacidad</a></p>
+        <button id="signin" class="btn primary">Conectar con Google</button>
+      </div>
+      <div id="acctOn" class="hidden">
+        <div class="cloudrow"><span>Conectado como <b id="acctMail"></b></span><span class="sp"></span>
+          <button id="syncNow" class="btn">Actualizar</button><button id="signout" class="btn">Desconectar</button></div>
+        <div id="syncMsg" class="muted small"></div>
+      </div>
+    </div>
+  </details>
+
+  <details class="panel" id="p-add">
+    <summary>Agregar canción</summary>
+    <div class="body">
+      <form id="urlForm" class="addrow">
+        <input id="url" type="url" placeholder="Pegá un link de YouTube u otro sitio" required>
+        <button class="btn primary">Agregar</button>
+      </form>
+      <label class="drop">
+        <input id="file" type="file" accept="audio/*" multiple>
+        <span><b>Subir un audio</b> desde el teléfono</span>
+      </label>
+      <div id="addNote" class="muted small">Tu PC la procesa cuando esté encendida y con StemLab abierto. Cuando termine, aparece acá lista para bajar.</div>
+    </div>
+  </details>
+
+  <details class="panel hidden" id="p-queue">
+    <summary>En tu PC <span class="tag" id="queueTag"></span></summary>
+    <div class="body"><div id="queue" class="qlist"></div></div>
+  </details>
+
+  <details class="panel" id="p-songs" open>
+    <summary>Mis temas <span class="tag" id="count"></span></summary>
+    <div class="body">
+      <div id="total" class="muted small selbar"></div>
+      <div id="list" class="grid"></div>
+      <p id="empty" class="muted">Todavía no hay temas. Conectá tu cuenta o agregá uno para que lo procese tu PC.</p>
+    </div>
+  </details>
+
+  <details class="panel" id="p-data">
+    <summary>Este teléfono</summary>
+    <div class="body">
+      <p id="usage" class="muted small"></p>
+      <button id="wipe" class="btn danger">Borrar datos de este dispositivo</button>
+      <p class="muted small">Quita todos los temas descargados, la sesión de Google y la memoria de la app en este teléfono. Lo que está en tu Drive y en tu PC no se toca.</p>
+    </div>
+  </details>
+</main>
+<dialog id="menu"><p id="menuTitle"></p>
+  <button id="mRemove" class="btn">Quitar del teléfono</button>
+  <button id="mDelete" class="btn danger">Borrar de todos lados</button>
+  <button id="mCancel" class="link">Cancelar</button></dialog>
+<script type="module" src="pwa-app.js"></script>
+</body></html>

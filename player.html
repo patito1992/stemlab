@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es" data-mode="pwa"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0a10">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
+<title>StemLab · Reproductor</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="player.css">
+</head><body>
+<header class="top">
+  <a class="back" href="./" aria-label="Volver a mis temas">‹</a>
+  <div class="ttl"><h1 id="title">…</h1><div id="info" class="sub"></div></div>
+  <button id="foldAll" class="link"></button>
+</header>
+<main>
+  <section class="panel pad" id="loading"><p id="loadmsg" class="muted">Cargando instrumentos…</p><div class="bar"><div id="loadbar"></div></div></section>
+  <div id="warn" class="warn hidden"></div>
+  <div id="player" class="hidden">
+
+    <details class="panel" id="p-live" open>
+      <summary>En vivo</summary>
+      <div class="body stage">
+        <div id="chordNow" class="chordrow hidden"><div id="chCur" class="cur">–</div><div id="chNext" class="nxt"></div></div>
+        <div id="lyLive" class="lylive hidden"><div id="lyNow" class="now"></div><div id="lyN1" class="nx"></div><div id="lyN2" class="nx"></div></div>
+        <p id="liveHint" class="muted small">Cuando el tema tenga acordes o letra, los vas a ver acá mientras suena.</p>
+      </div>
+    </details>
+
+    <details class="panel" id="p-stems" open>
+      <summary>Instrumentos</summary>
+      <div class="body"><div id="stems" class="lanes"></div></div>
+    </details>
+
+    <details class="panel" id="p-tempo" open>
+      <summary>Tempo y tono</summary>
+      <div class="body two">
+        <div class="ctl">
+          <div class="ctl-h"><span>Tempo</span><b id="tempoVal" class="big">100%</b></div>
+          <input id="tempo" type="range" min="40" max="180" step="1" value="100" aria-label="Tempo">
+          <div class="ctl-r">
+            <button id="tempoDown" class="btn sq" title="Bajar 5%">−5</button>
+            <button id="tempoUp" class="btn sq" title="Subir 5%">+5</button>
+            <label class="inl">BPM <input id="bpmTarget" type="number" min="20" max="400" step="1"></label>
+            <button id="tempoReset" class="link">original</button>
+          </div>
+          <div id="bpmNow" class="muted small"></div>
+        </div>
+        <div class="ctl">
+          <div class="ctl-h"><span>Tono</span><b id="semiVal" class="big">0</b></div>
+          <div class="ctl-r">
+            <button id="semiDown" class="btn sq" title="Bajar un semitono">−</button>
+            <button id="semiUp" class="btn sq" title="Subir un semitono">+</button>
+            <button id="semiReset" class="link">original</button>
+          </div>
+          <div id="keyNow" class="muted small"></div>
+          <div class="muted small">Solo cambia los instrumentos melódicos. La batería queda igual.</div>
+        </div>
+      </div>
+    </details>
+
+    <details class="panel" id="p-click">
+      <summary>Click y pre-conteo</summary>
+      <div class="body">
+        <div class="ctl-r wide"><button id="clickToggle" class="btn">Apagado</button>
+          <input id="clickVol" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Volumen del click"></div>
+        <div class="opts">
+          <label class="inl">Subdivisión <select id="subdiv"><option value="1">Negras</option><option value="2">Corcheas</option><option value="3">Tresillos</option><option value="4">Semicorcheas</option></select></label>
+          <label class="inl">Pre-conteo <select id="countin"><option value="0">Sin</option><option value="1">1 compás</option><option value="2">2 compases</option></select></label>
+          <label class="inl">Ajuste fino <input id="nudge" type="number" step="10" value="0"> ms</label>
+        </div>
+      </div>
+    </details>
+
+    <details class="panel" id="p-loop">
+      <summary>Loop A-B</summary>
+      <div class="body">
+        <div class="opts">
+          <button id="loopA" class="btn">Marcar A</button><button id="loopB" class="btn">Marcar B</button>
+          <button id="loopToggle" class="btn">Loop: no</button><button id="loopClear" class="link">borrar</button>
+          <label class="inl"><input type="checkbox" id="snap" checked> ajustar al pulso</label>
+          <span id="loopInfo" class="muted small"></span>
+        </div>
+      </div>
+    </details>
+
+    <details class="panel hidden" id="p-chords">
+      <summary>Cifrado de acordes</summary>
+      <div class="body">
+        <div class="ctl-r wide">
+          <span class="muted small">Transponer acordes</span>
+          <button id="chDown" class="btn sq" title="Bajar los acordes un semitono">−</button>
+          <b id="chVal" class="big">0</b>
+          <button id="chUp" class="btn sq" title="Subir los acordes un semitono">+</button>
+          <button id="chReset" class="link">original</button>
+        </div>
+        <label class="inl"><input type="checkbox" id="chSimple"> Acordes simples (sin séptimas)</label>
+        <label class="inl">Ajuste de sincronía <input id="chLead" type="number" step="20" value="0" style="width:84px"> ms</label>
+        <div class="muted small">Positivo: el acorde aparece antes. Negativo: más tarde. Útil con auriculares Bluetooth o si sentís el cifrado adelantado o atrasado.</div>
+        <div id="chKey" class="muted small"></div>
+        <div class="muted small">Solo cambia el cifrado en pantalla. El audio no se toca.</div>
+        <div id="chordList"></div>
+      </div>
+    </details>
+
+    <details class="panel" id="p-lyrics">
+      <summary>Letra</summary>
+      <div class="body">
+        <div id="lyMsg" class="muted small"></div>
+        <div id="lyList" class="lylist"></div>
+        <div id="lyTools" class="opts hidden">
+          <span class="muted small">Sincronía (+ atrasa la letra)</span>
+          <button id="lyMinus" class="btn">−0,1 s</button><span id="lyOff" class="off">0,0 s</span><button id="lyPlus" class="btn">+0,1 s</button>
+          <button id="lyDel" class="link pc-only">borrar letra</button>
+        </div>
+        <div class="opts pc-only">
+          <input id="lyQuery" type="text" placeholder="Artista - Canción">
+          <button id="lySearch" class="btn">Buscar letra</button>
+          <button id="lyWhisper" class="btn" title="Transcribe la voz con IA, en tu PC. Lento.">Transcribir con IA</button>
+          <button id="lyPaste" class="btn">Pegar letra</button>
+          <button id="lyAlign" class="btn hidden" title="Escucha este tema y arma la letra tal como se canta en esta versión (partes agregadas, quitadas o repetidas), usando la original como guía. Lento.">Adaptar a esta versión</button>
+        </div>
+        <div id="lyPasteBox" class="hidden pc-only"><textarea id="lyText" rows="7" placeholder="Pegá la letra. Si tiene tiempos como [01:23.45] queda sincronizada; si no, se muestra pero no sigue la música."></textarea>
+          <button id="lySave" class="btn primary">Guardar letra</button></div>
+      </div>
+    </details>
+
+    <details class="panel" id="p-export">
+      <summary>Exportar</summary>
+      <div class="body">
+        <div class="opts">
+          <button id="exportBtn" class="btn primary">Exportar MP3</button>
+          <label class="inl"><input type="checkbox" id="exportLoop" disabled> solo el tramo A-B</label>
+          <span id="exportMsg" class="muted small"></span>
+        </div>
+        <div class="muted small">Guarda la mezcla como está ahora: volúmenes, instrumentos silenciados, tempo y tono.</div>
+      </div>
+    </details>
+
+    <div id="diag" class="muted diag"></div>
+    <p class="muted small ver">StemLab · motor v16 · tecla D: diagnóstico</p>
+  </div>
+</main>
+
+<footer class="dock hidden" id="dock">
+  <button id="play" class="playbtn" aria-label="Reproducir">▶</button>
+  <span id="time" class="time">0:00 / 0:00</span>
+  <div class="seekwrap">
+    <canvas id="waveBase" class="wv base"></canvas><canvas id="waveFill" class="wv fill"></canvas>
+    <div id="loopRegion" class="loopregion hidden"></div>
+    <div id="playhead" class="playhead"></div>
+    <input id="seek" type="range" min="0" max="1000" value="0" aria-label="Posición">
+  </div>
+  <label class="vol" title="Volumen general"><span aria-hidden="true">♪</span><input id="master" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volumen general"></label>
+</footer>
+<script type="module" src="player.js"></script>
+</body></html>

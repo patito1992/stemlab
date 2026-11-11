@@ -1,0 +1,39 @@
+.addrow{display:flex;gap:10px}
+.addrow input{flex:1;min-width:0}
+.drop{display:block;border:1.5px dashed #3a3950;border-radius:14px;padding:16px;text-align:center;color:var(--mut);cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover{border-color:var(--acc);background:rgba(139,108,255,.06)}
+.drop b{color:var(--fg)}
+.drop input{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.song{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0}
+.cover{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;display:grid;place-items:center;font-size:44px;font-weight:700;letter-spacing:-.03em;color:rgba(255,255,255,.92);text-shadow:0 2px 14px rgba(0,0,0,.25);background:linear-gradient(140deg,hsl(var(--h) 72% 52%),hsl(calc(var(--h) + 55) 80% 28%))}
+.cover::before{content:"";position:absolute;inset:auto 0 0 0;height:46%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.22) 0 3px,transparent 3px 7px);-webkit-mask:linear-gradient(0deg,#000,transparent);mask:linear-gradient(0deg,#000,transparent)}
+.cover .go{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;background:#fff;color:#14131c;display:grid;place-items:center;font-size:15px;opacity:0;transform:translateY(6px);transition:opacity .16s,transform .16s;text-shadow:none}
+.song:hover .go,.song:focus-within .go{opacity:1;transform:none}
+.song .name{font-weight:600;font-size:14px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.song .chips{display:flex;gap:6px;flex-wrap:wrap}
+.song .stage{font-size:12px;color:var(--mut)}
+.song .err{font-size:12px;color:var(--err);word-break:break-word}
+.song.busy .cover{filter:saturate(.35) brightness(.7)}
+.song .prog{height:3px;border-radius:2px;background:var(--panel2);overflow:hidden}
+.song .prog::after{content:"";display:block;height:100%;width:40%;background:var(--grad);animation:slide 1.4s ease-in-out infinite}
+@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
+.song .x{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(10,9,16,.62);backdrop-filter:blur(6px);color:#fff;font-size:13px;display:grid;place-items:center;opacity:.0;transition:opacity .15s}
+.song:hover .x,.song:focus-within .x{opacity:1}
+@media (hover:none){.song .x{opacity:.85}}
+.song .retry{align-self:flex-start;padding:5px 10px;font-size:12px}
+@media (max-width:520px){.grid{grid-template-columns:repeat(2,1fr)}.addrow{flex-direction:column}}
+
+.selbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;min-height:32px}
+.selbar .sp{flex:1}
+.btn.danger{background:#5a1e2b;border-color:#8a2c40;color:#fff}.btn.danger:disabled{opacity:.4}
+.song .pick{position:absolute;top:8px;left:8px;z-index:2;width:26px;height:26px;display:grid;place-items:center;border-radius:8px;background:rgba(10,9,16,.7)}
+.song .pick input{width:18px;height:18px;accent-color:var(--acc)}
+.song.picked .cover{outline:3px solid var(--acc);outline-offset:-3px}
+
+.cloudform{display:grid;gap:8px;margin-top:8px}
+.cloudform input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line,#2a2838);background:rgba(255,255,255,.04);color:inherit}
+.cloudrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#p-cloud a.btn{display:inline-block;text-decoration:none;margin:8px 8px 0 0}
+.cloudrow .sp{flex:1}
+.cloudrow+.cloudrow{margin-top:10px}

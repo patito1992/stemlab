@@ -1,0 +1,14 @@
+.qlist{display:grid;gap:8px}
+.qrow{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--panel2,#1b1a26)}
+.qrow b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:14px}
+.qrow span{font-size:12px;color:var(--mut)}
+.song .dl{align-self:flex-start;padding:6px 12px;font-size:13px}
+.song .bar2{height:6px;border-radius:3px;background:var(--panel2);overflow:hidden}
+.song .bar2 i{display:block;height:100%;width:0;background:var(--grad,#8b6cff);transition:width .2s}
+.song .cloudtag{font-size:11px;color:var(--mut)}
+dialog#menu{border:1px solid #3a3950;border-radius:16px;background:#14131c;color:#eee;padding:18px;max-width:320px;width:calc(100% - 40px)}
+dialog#menu::backdrop{background:rgba(0,0,0,.6)}
+dialog#menu p{margin:0 0 12px;font-weight:600;word-break:break-word}
+dialog#menu .btn{display:block;width:100%;margin-bottom:8px}
+dialog#menu .link{display:block;margin:6px auto 0}
+.btn.danger{background:#5a1e2b;border-color:#8a2c40;color:#fff}
