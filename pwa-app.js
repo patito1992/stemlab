@@ -15,8 +15,8 @@ const note = t => { const n = $('#note'); n.textContent = t || ''; n.classList.t
 initPanels($('#foldAll'));
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
-  let reloaded = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => { if (reloaded) return; reloaded = true; if (!document.querySelector('#menu[open]')) location.reload(); });
+  let reloaded = false; const hadController = !!navigator.serviceWorker.controller;   // en la primera visita no recargar: cortaría un inicio de sesión en curso
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (reloaded || !hadController) return; reloaded = true; if (!document.querySelector('#menu[open]')) location.reload(); });
 }
 
 let files = [], manifest = { songs: [], queue: [] }, local = [], online = true;
